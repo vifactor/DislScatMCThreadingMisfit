@@ -1,0 +1,6 @@
+*
+!README.md
+!src/
+!include/
+!default.cfg
+!.gitignore
