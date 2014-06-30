@@ -8,9 +8,13 @@
 #ifndef PROGRAMSETTINGS_H_
 #define PROGRAMSETTINGS_H_
 
-#include "StringTools.h"
+#include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
+
 #include "MillerIndexHex.h"
 #include <libconfig.h++>
+#include <vector>
+#include <iostream>
 
 struct Range
 {

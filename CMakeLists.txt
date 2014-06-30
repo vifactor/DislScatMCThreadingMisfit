@@ -14,6 +14,9 @@ find_package(BLAS REQUIRED)
 #MPI
 find_package(MPI REQUIRED)
 
+#BOOST
+find_package(Boost COMPONENTS filesystem system REQUIRED)
+
 #some libraries are build as external projects
 include(ExternalProject)
 
@@ -42,4 +45,7 @@ add_executable(${EXEC_NAME} ${CPP_SOURCES})
 
 add_dependencies(${EXEC_NAME} config_project)
 
-target_link_libraries(${EXEC_NAME} config++ gsl ${BLAS_LIBRARIES} ${MPI_LIBRARIES})
+target_link_libraries(${EXEC_NAME} config++ gsl 
+                                    ${Boost_LIBRARIES} 
+                                    ${BLAS_LIBRARIES}
+                                    ${MPI_LIBRARIES})

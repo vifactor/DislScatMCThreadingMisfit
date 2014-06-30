@@ -172,27 +172,15 @@ bool RootEngine::done(const MCCalculator::Data * data)
 }
 
 
-void RootEngine::copySettings(const std::string& src, const std::string& dest)
+void RootEngine::copySettings(const std::string& orig_cfg, const std::string& out)
 {
-	std::ofstream fout;
-	std::ifstream fin;
-	std::string filename, line;
+	boost::filesystem::path backup_cfg;
 
-	filename = dest;
-	stripExtension(filename);
-	filename += ".~cfg";
+	backup_cfg = out;
+	backup_cfg.replace_extension(".cfg");
 
-	fout.open(filename.c_str());
-	fin.open(src.c_str());
-
-	/*while (!fin.eof())
-	{
-		getline(fin, line);
-		fout << line;
-	}*/
-
-	fout << fin.rdbuf();
-
-	fin.close();
-	fout.close();
+	/* copy configuration 
+	 * in a file with extension cfg and same filename as output file
+	 */
+	boost::filesystem::copy(orig_cfg, backup_cfg);
 }

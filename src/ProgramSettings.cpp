@@ -6,6 +6,7 @@
  */
 
 #include "ProgramSettings.h"
+using namespace boost;
 
 Range readRange(const libconfig::Setting& stg)
 {
@@ -36,7 +37,8 @@ MillerDirectHexIndices readMillerDirectHexIndices(const libconfig::Setting& stg)
 	}
 	else
 	{
-		throw ProgramSettings::Exception("Check setting: " + toString(stg.getPath()));
+		throw ProgramSettings::Exception("Check setting: " 
+		                            + lexical_cast<std::string>(stg.getPath()));
 	}
 	return index;
 }
@@ -53,7 +55,8 @@ MillerReciprocalHexIndices readMillerReciprocalHexIndices(const libconfig::Setti
 	}
 	else
 	{
-		throw ProgramSettings::Exception("Check setting: " + toString(stg.getPath()));
+		throw ProgramSettings::Exception("Check setting: " 
+		                            + lexical_cast<std::string>(stg.getPath()));
 	}
 	return index;
 }
@@ -95,22 +98,24 @@ void ProgramSettings::read(const std::string& cfgfile)
 		readEngineSettings(root);
 	} catch (const libconfig::FileIOException &fioex)
 	{
-		throw Exception(toString(fioex.what()) + " in\t" + cfgfile);
+		throw Exception(lexical_cast<std::string>(fioex.what()) + " in\t" + cfgfile);
 	} catch (const libconfig::ParseException &pex)
 	{
 		throw Exception(
-				toString(pex.what()) + " in\t" + cfgfile + ":"
-						+ toString(pex.getLine()) + " - "
-						+ toString(pex.getError()));
+				lexical_cast<std::string>(pex.what()) + " in\t" + cfgfile + ":"
+						+ lexical_cast<std::string>(pex.getLine()) + " - "
+						+ lexical_cast<std::string>(pex.getError()));
 	} catch (const libconfig::SettingNotFoundException &nfex)
 	{
 		throw Exception(
-				toString(nfex.what()) + "\t" + toString(nfex.getPath())
+				lexical_cast<std::string>(nfex.what()) + "\t" 
+				        + lexical_cast<std::string>(nfex.getPath())
 						+ " in\t" + cfgfile);
 	} catch (libconfig::SettingTypeException& tex)
 	{
 		throw Exception(
-				toString(tex.what()) + "\t" + toString(tex.getPath()) + " in\t"
+				lexical_cast<std::string>(tex.what()) + "\t" 
+				        + lexical_cast<std::string>(tex.getPath()) + " in\t"
 						+ cfgfile);
 	}
 }
@@ -129,12 +134,14 @@ void ProgramSettings::readCalculatorSettings(const libconfig::Setting& root)
 	}
 	else
 	{
-		throw ProgramSettings::Exception("Check reflection: " + toString(calculator["Q"].getPath()));
+		throw ProgramSettings::Exception("Check reflection: " 
+		                + lexical_cast<std::string>(calculator["Q"].getPath()));
 	}
 	/*check the property of hexagonal Miller indices*/
 	if(!m_calculatorSettings.Q.isCorrect())
 	{
-		throw ProgramSettings::Exception( "Miller index property is brocken: " + toString(calculator["Q"].getPath()));
+		throw ProgramSettings::Exception( "Miller index property is brocken: " 
+		                + lexical_cast<std::string>(calculator["Q"].getPath()));
 	}
 
 	/*X-ray wavelength*/
@@ -207,7 +214,8 @@ void ProgramSettings::readEngineSettings(const libconfig::Setting& root)
 	}
 	else
 	{
-		throw Exception("Unknown geometry setup:\t" + toString(engine["geometry"].c_str()));
+		throw Exception("Unknown geometry setup:\t" 
+		                + lexical_cast<std::string>(engine["geometry"].c_str()));
 	}
 
 	m_engineSettings.outfile = engine["outfile"].c_str();
@@ -232,11 +240,13 @@ void ProgramSettings::readSkewSettings(const libconfig::Setting& stg)
 	}
 	else
 	{
-		throw Exception("Unknown diffractometry setup:\t" + toString(stg["diffractometry"].c_str()));
+		throw Exception("Unknown diffractometry setup:\t" 
+		            + lexical_cast<std::string>(stg["diffractometry"].c_str()));
 	}
 }
 
-ProgramSettings::EngineSettings::Diffractometry ProgramSettings::defineDiffractometry(const libconfig::Setting& stg)
+ProgramSettings::EngineSettings::Diffractometry 
+ProgramSettings::defineDiffractometry(const libconfig::Setting& stg)
 {
 	std::string diffractometry;
 
@@ -414,11 +424,13 @@ void ProgramSettings::readMisfitDislocationFamilies(const libconfig::Setting& st
                 /*check the property of hexagonal Miller indices*/
                 if(!b.isCorrect())
                 {
-                    throw ProgramSettings::Exception("Miller hexagonal index: " + toString(vecs[ivec]["b"].getPath()));
+                    throw ProgramSettings::Exception("Miller hexagonal index: " 
+                        + lexical_cast<std::string>(vecs[ivec]["b"].getPath()));
                 }
                 if(!l.isCorrect())
                 {
-                    throw ProgramSettings::Exception("Miller hexagonal index: " + toString(vecs[ivec]["l"].getPath()));
+                    throw ProgramSettings::Exception("Miller hexagonal index: " 
+                        + lexical_cast<std::string>(vecs[ivec]["l"].getPath()));
                 }
 
                 m_sampleSettings.misfit_family[ifam].bs.push_back(b);
@@ -451,7 +463,8 @@ void ProgramSettings::readThreadingDislocationFamilies(const libconfig::Setting&
                 /*check the property of hexagonal Miller indices*/
                 if(!b.isCorrect())
                 {
-                    throw ProgramSettings::Exception("Miller hexagonal index: " + toString(vecs[ivec].getPath()));
+                    throw ProgramSettings::Exception("Miller hexagonal index: " 
+                            + lexical_cast<std::string>(vecs[ivec].getPath()));
                 }
 
                 m_sampleSettings.threading_family[ifam].bs.push_back(b);
@@ -497,16 +510,19 @@ void ProgramSettings::printMisfitDislocationFamilies() const
 	for (size_t ifam = 0; ifam < m_sampleSettings.misfit_family.size(); ++ifam)
 	{
 		std::cout << "\tFamily:\t" << ifam << std::endl;
-		std::cout << "\t\tDensity:\t" << m_sampleSettings.misfit_family[ifam].rho
+		std::cout << "\t\tDensity:\t" 
+		        << m_sampleSettings.misfit_family[ifam].rho
 				<< std::endl;
-		std::cout << "\t\tCorrelation parameter:\t" << m_sampleSettings.misfit_family[ifam].gamma
+		std::cout << "\t\tCorrelation parameter:\t" 
+		        << m_sampleSettings.misfit_family[ifam].gamma
 				<< std::endl;
 
         std::cout << "\t\tBurgers vectors:Dislocation lines:\t" << std::endl;
         for (size_t ivec = 0; ivec < m_sampleSettings.misfit_family[ifam].bs.size(); ++ivec)
         {
-             std::cout << "\t\t\tb" << m_sampleSettings.misfit_family[ifam].bs[ivec] << ":l" <<
-                    m_sampleSettings.misfit_family[ifam].ls[ivec] << std::endl;
+             std::cout << "\t\t\tb" << m_sampleSettings.misfit_family[ifam].bs[ivec] 
+                        << ":l" 
+                        << m_sampleSettings.misfit_family[ifam].ls[ivec] << std::endl;
         }
 	}
 }
