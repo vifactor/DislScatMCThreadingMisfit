@@ -19,13 +19,13 @@ void MCCalculatorCoplanar::setupLaboratoryFrame()
 {
     Geometry::Vector3d Qpar, Qper;
 
-    Qpar = m_sample->m_normal * (m_sample->m_normal * m_Q);
+    Qpar = m_sample->m_normal * inner_prod(m_sample->m_normal, m_Q);
     Qper = m_Q - Qpar;
 
     /*z along surface normal*/
     m_axis_z = m_sample->m_normal;
-    m_axis_z.normalize();
-    if(Qper.norm() <= m_epsilon)
+    normalize(m_axis_z);
+    if(norm_2(Qper) <= m_epsilon)
     {
         /*for symmetric reflection orientation of x-axis is irrelevant*/
         /*find any vector perpendicular to z */
@@ -35,29 +35,33 @@ void MCCalculatorCoplanar::setupLaboratoryFrame()
 		 * calculate the cross product [m_axis_z % vec],
 		 * where vec is not collinear with m_axis_z
 		 */
-		if((m_axis_z.y != 0) || (m_axis_z.z != 0))
-			m_axis_x = m_axis_z % Geometry::Vector3d(1, 0, 0);
+		if((m_axis_z[1] != 0) || (m_axis_z[2] != 0))
+			m_axis_x = cross(m_axis_z, Geometry::Vector3d(1, 0, 0));
 		else
-			m_axis_x = m_axis_z % Geometry::Vector3d(0, 1, 0);
+			m_axis_x = cross(m_axis_z, Geometry::Vector3d(0, 1, 0));
 
-		m_axis_x.normalize();
+		normalize(m_axis_x);
     }
     else
     {
         /*for asymmetric reflection orientation x along Qper*/
-        m_axis_x = Qper.normalize();
+        m_axis_x = normalize(Qper);
     }
     /* y perpendicular to both */
-    m_axis_y = m_axis_z % m_axis_x;
+    m_axis_y = cross(m_axis_z, m_axis_x);
 
     /*std::cout << "Qx:\t" << m_Q * m_axis_x << std::endl;
     std::cout << "Qz:\t" << m_Q * m_axis_z << std::endl;*/
 
 
     /*initialize components of scattering vector in correlation function for misfit dislocations*/
-    m_sample->setQ(m_Q * m_axis_x, m_Q * m_axis_y, m_Q * m_axis_z);
+    m_sample->setQ(inner_prod(m_Q, m_axis_x),
+                    inner_prod(m_Q, m_axis_y),
+                    inner_prod(m_Q, m_axis_z));
 
-    std::cout << "Q_lab:\t" << m_Q * m_axis_x << "\t" << m_Q * m_axis_y << "\t" << m_Q * m_axis_z << std::endl;
+    std::cout << "Q_lab:\t" << inner_prod(m_Q, m_axis_x) 
+            << "\t" << inner_prod(m_Q, m_axis_y) 
+            << "\t" << inner_prod(m_Q, m_axis_z) << std::endl;
 }
 
 void MCCalculatorCoplanar::add(Data * data)
@@ -85,7 +89,7 @@ void MCCalculatorCoplanar::add(Data * data)
     U1 = m_sample->U_threading(r1);
     U2 = m_sample->U_threading(r2);
 
-    QU = m_Q * (U1 - U2);
+    QU = inner_prod(m_Q, (U1 - U2));
     Gmisfit = exp(-m_sample->T_misfit(-x, y, -z1, -z2));
 
     /*std::cout << "x, z1, z2, z:\t" <<  x << "\t" << z1 << "\t" << z2 << "\t" << z << std::endl;

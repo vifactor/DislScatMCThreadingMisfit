@@ -2,7 +2,7 @@
 #define DislocationPerpendicular_H
 
 #include <iostream>
-#include "Vector3d.h"
+#include <Vector3d.hpp>
 #include <dislocation_displacement.h>
 
 class DislocationPerpendicular
@@ -12,7 +12,7 @@ public:
     DislocationPerpendicular(const Geometry::Vector3d& Burgers, const Geometry::Vector3d& normal);
     /** Default destructor */
     virtual ~DislocationPerpendicular();
-	void moveTo(const Geometry::Vector2d& pos);
+	void moveTo(const double posx, const double posy);
 
 	const Geometry::Vector3d& U(const Geometry::Vector3d& r) const;
 	/*Poisson ratio*/

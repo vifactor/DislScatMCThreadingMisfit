@@ -1,5 +1,7 @@
 #include "MCCalculatorSkewDouble.h"
 
+using namespace boost;
+
 MCCalculatorSkewDouble::MCCalculatorSkewDouble(gsl_rng * rng, MCSampleHex * sample, const Geometry::Vector3d& Q, double sigmax, double sigmaz, double lambda)
 {
     m_rng = rng;
@@ -22,48 +24,48 @@ void MCCalculatorSkewDouble::setupLaboratoryFrame()
     Geometry::Vector3d Q_cross_n, Kout, Kout_per, Kout_par, v1, v2;
     double cos_phi, sin_psi, cos_psi;
 
-    theta = asin(m_Q.norm() * m_lambda/(4. * M_PI));
+    theta = asin(norm_2(m_Q) * m_lambda/(4. * M_PI));
 
     v1 = m_Q / 2.0;
     /**vector perpendicular to normal and Q direction**/
-    Q_cross_n = m_Q % m_sample->m_normal;
-    if(Q_cross_n.norm() == 0)
+    Q_cross_n = cross(m_Q, m_sample->m_normal);
+    if(norm_2(Q_cross_n) == 0)
     {
         /*symmetric reflection: xy orientation is not important*/
-        v2 = Geometry::Vector3d(1.0, 0.0, 0.0) * v1.norm() /tan(theta);
+        v2 = Geometry::Vector3d(1.0, 0.0, 0.0) * norm_2(v1) /tan(theta);
     }
     else
     {
-        Q_cross_n.normalize();
+        normalize(Q_cross_n);
         /** v2 = |Kout| cos(theta) Q_cross_n, |Kout = 2 pi / lambda| **/
         v2 = Q_cross_n * (2.0 * M_PI / m_lambda) * cos(theta);
     }
     Kout = v1 + v2;
 
-    Kout_par = m_sample->m_normal * (m_sample->m_normal * Kout);
+    Kout_par = m_sample->m_normal * inner_prod(m_sample->m_normal, Kout);
     Kout_per = Kout - Kout_par;
 
     /*x along in-plane component of Kout*/
     m_axis_x = Kout_per;
-    m_axis_x.normalize();
+    normalize(m_axis_x);
 
     /*z along surface normal*/
     m_axis_z = m_sample->m_normal;
-    m_axis_z.normalize();
+    normalize(m_axis_z);
 
     /*z along surface normal*/
     m_axis_z = m_sample->m_normal;
 
     /*y perpendicular to both x and z*/
-    m_axis_y = m_axis_z % m_axis_x;
+    m_axis_y = cross(m_axis_z, m_axis_x);
 
     //Phi  - angle between x-axis and Kout
-    cos_phi = (m_axis_x * Kout) / Kout.norm();
+    cos_phi = inner_prod(m_axis_x, Kout) / norm_2(Kout);
     m_sin_phi = sqrt(1.0 - gsl_pow_2(cos_phi));
     m_cotan_phi = cos_phi / m_sin_phi;
 
     //x axis along projection of Q on the surface
-    sin_psi = m_Q.z / m_Q.norm();
+    sin_psi = m_Q[2] / norm_2(m_Q);
     /**
         limited precision problem required this type of hack
         otherwise for symmetric reflection when sin_psi = 0
@@ -94,9 +96,13 @@ void MCCalculatorSkewDouble::setupLaboratoryFrame()
     std::cout << m_Q.x << "\t" << m_Q.y << "\t" << m_Q.z << std::endl;*/
 
     /*initialize components of scattering vector in correlation function for misfit dislocations*/
-    m_sample->setQ(m_Q * m_axis_x, m_Q * m_axis_y, m_Q * m_axis_z);
+    m_sample->setQ(inner_prod(m_Q, m_axis_x),
+                    inner_prod(m_Q, m_axis_y),
+                    inner_prod(m_Q, m_axis_z));
 
-    std::cout << "Q_lab:\t" << m_Q * m_axis_x << "\t" << m_Q * m_axis_y << "\t" << m_Q * m_axis_z << std::endl;
+    std::cout << "Q_lab:\t" << inner_prod(m_Q, m_axis_x) 
+            << "\t" << inner_prod(m_Q, m_axis_y) 
+            << "\t" << inner_prod(m_Q, m_axis_z) << std::endl;
 }
 
 void MCCalculatorSkewDouble::add(Data * data)
@@ -133,7 +139,7 @@ void MCCalculatorSkewDouble::add(Data * data)
     U1 = m_sample->U_threading(r1);
     U2 = m_sample->U_threading(r2);
 
-    QU = m_Q * (U1 - U2);
+    QU = inner_prod(m_Q, (U1 - U2));
     /**
         the T correlation function is given in the following coordinate frame:
             - x-coordinate along in-plane Q

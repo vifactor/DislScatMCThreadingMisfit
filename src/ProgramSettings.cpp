@@ -61,18 +61,6 @@ MillerReciprocalHexIndices readMillerReciprocalHexIndices(const libconfig::Setti
 	return index;
 }
 
-std::ostream& operator<<(std::ostream& out, const MillerDirectHexIndices& index)
-{
-	out << "[" << index.X << ", " << index.Y << ", " << index.T << ", " << index.Z << "]";
-	return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const MillerReciprocalHexIndices& index)
-{
-	out << "[" << index.H << ", " << index.K << ", " << index.I << ", " << index.L << "]";
-	return out;
-}
-
 ProgramSettings::ProgramSettings()
 {
 }

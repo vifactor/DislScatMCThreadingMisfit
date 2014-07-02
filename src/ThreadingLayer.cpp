@@ -65,12 +65,14 @@ void ThreadingLayer::update()
 void ThreadingLayer::update_correlated()
 {
     static double R, phi, dx, dy;
-    static Geometry::Vector2d center, pos1, pos2;
+    static double center_x, center_y,
+                    pos1_x, pos1_y,
+                    pos2_x, pos2_y;
 
     for(size_t i = 0; i < m_dislocations.size(); i += 2)
     {
-        center.x = gsl_ran_flat(m_rng, -m_width/2, m_width/2);
-        center.y = gsl_ran_flat(m_rng, -m_width/2, m_width/2);
+        center_x = gsl_ran_flat(m_rng, -m_width/2, m_width/2);
+        center_y = gsl_ran_flat(m_rng, -m_width/2, m_width/2);
 
         R    = gsl_ran_gaussian_ziggurat(m_rng, m_Rc);
         phi  = gsl_ran_flat(m_rng, 0.0, 2.0 * M_PI);
@@ -78,23 +80,23 @@ void ThreadingLayer::update_correlated()
         dx = R * cos(phi)/2;
         dy = R * sin(phi)/2;
 
-        pos1.set(center.x - dx, center.y - dy);
-        pos2.set(center.x + dx, center.y + dy);
+        pos1_x = center_x - dx; pos1_y = center_y - dy;
+        pos2_x = center_x + dx; pos2_y = center_y + dy;
 
-        m_dislocations[i]->moveTo(pos1);
-        m_dislocations[i + 1]->moveTo(pos2);
+        m_dislocations[i]->moveTo(pos1_x, pos1_y);
+        m_dislocations[i + 1]->moveTo(pos2_x, pos2_y);
     }
 }
 
 void ThreadingLayer::update_uncorrelated()
 {
-    static Geometry::Vector2d pos;
+    static double posx, posy;
 
     for(size_t i = 0; i < m_dislocations.size(); ++i)
     {
-        pos.x = gsl_ran_flat(m_rng, -m_width/2, m_width/2);
-        pos.y = gsl_ran_flat(m_rng, -m_width/2, m_width/2);
+        posx = gsl_ran_flat(m_rng, -m_width/2, m_width/2);
+        posy = gsl_ran_flat(m_rng, -m_width/2, m_width/2);
 
-        m_dislocations[i]->moveTo(pos);
+        m_dislocations[i]->moveTo(posx, posy);
     }
 }

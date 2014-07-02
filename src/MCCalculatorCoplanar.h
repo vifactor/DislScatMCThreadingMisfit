@@ -2,7 +2,6 @@
 #define MCCALCULATORCOPLANAR_H
 
 #include "MCCalculator.h"
-#include "Extensions.h"
 
 class MCCalculatorCoplanar : public MCCalculator
 {

@@ -37,7 +37,7 @@ ExternalProject_Add(
     miller_project
     PREFIX ${CMAKE_BINARY_DIR}
     GIT_REPOSITORY https://github.com/vifactor/MillerIndices.git
-    GIT_TAG origin
+    GIT_TAG origin/master
 )
 
 #compile project itself

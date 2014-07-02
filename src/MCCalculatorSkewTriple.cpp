@@ -22,13 +22,13 @@ void MCCalculatorSkewTriple::setupLaboratoryFrame()
     double cos_psi;
 
     /**laboratory coordinate frame for skew triple crystal is the same as for coplanar**/
-    Qpar = m_sample->m_normal * (m_sample->m_normal * m_Q);
+    Qpar = m_sample->m_normal * inner_prod(m_sample->m_normal, m_Q);
     Qper = m_Q - Qpar;
 
     /*z along surface normal*/
     m_axis_z = m_sample->m_normal;
-    m_axis_z.normalize();
-    if(Qper.norm() <= m_epsilon)
+    normalize(m_axis_z);
+    if(norm_2(Qper) <= m_epsilon)
     {
         /*for symmetric reflection orientation of x-axis is irrelevant*/
         /*find any vector perpendicular to z */
@@ -38,28 +38,30 @@ void MCCalculatorSkewTriple::setupLaboratoryFrame()
 		 * calculate the cross product [m_axis_z % vec],
 		 * where vec is not collinear with m_axis_z
 		 */
-		if((m_axis_z.y != 0) || (m_axis_z.z != 0))
-			m_axis_x = m_axis_z % Geometry::Vector3d(1, 0, 0);
+		if((m_axis_z[1] != 0) || (m_axis_z[2] != 0))
+			m_axis_x = cross(m_axis_z, Geometry::Vector3d(1, 0, 0));
 		else
-			m_axis_x = m_axis_z % Geometry::Vector3d(0, 1, 0);
+			m_axis_x = cross(m_axis_z, Geometry::Vector3d(0, 1, 0));
 
-		m_axis_x.normalize();
+		normalize(m_axis_x);
     }
     else
     {
         /*for asymmetric reflection orientation x along Qper*/
-        m_axis_x = Qper.normalize();
+        m_axis_x = normalize(Qper);
     }
     /* y perpendicular to both */
-    m_axis_y = m_axis_z % m_axis_x;
+    m_axis_y = cross(m_axis_z, m_axis_x);
 
-    m_sin_psi = m_Q.z / m_Q.norm();
+    m_sin_psi = m_Q[2] / norm_2(m_Q);
     cos_psi = sqrt(1 - gsl_pow_2(m_sin_psi));
 
     m_cotan_psi = cos_psi / m_sin_psi;
 
     /*initialize components of scattering vector in correlation function for misfit dislocations*/
-    m_sample->setQ(m_Q * m_axis_x, m_Q * m_axis_y, m_Q * m_axis_z);
+    m_sample->setQ(inner_prod(m_Q, m_axis_x),
+                    inner_prod(m_Q, m_axis_y),
+                    inner_prod(m_Q, m_axis_z));
 }
 
 void MCCalculatorSkewTriple::add(Data * data)
@@ -95,7 +97,7 @@ void MCCalculatorSkewTriple::add(Data * data)
     U1 = m_sample->U_threading(r1);
     U2 = m_sample->U_threading(r2);
 
-    QU = m_Q * (U1 - U2);
+    QU = inner_prod(m_Q, (U1 - U2));
     /**
         the T correlation function is given in the following coordinate frame:
             - x-coordinate along in-plane Q
