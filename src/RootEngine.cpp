@@ -182,5 +182,6 @@ void RootEngine::copySettings(const std::string& orig_cfg, const std::string& ou
 	/* copy configuration 
 	 * in a file with extension cfg and same filename as output file
 	 */
-	boost::filesystem::copy(orig_cfg, backup_cfg);
+	boost::filesystem::copy_file(orig_cfg, backup_cfg, 
+	                    boost::filesystem::copy_option::overwrite_if_exists);
 }
