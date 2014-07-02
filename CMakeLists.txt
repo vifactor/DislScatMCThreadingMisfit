@@ -32,20 +32,31 @@ ExternalProject_Add(
     BUILD_IN_SOURCE 1
 )
 
+#Miller indices library
+ExternalProject_Add(
+    miller_project
+    PREFIX ${CMAKE_BINARY_DIR}
+    GIT_REPOSITORY https://github.com/vifactor/MillerIndices.git
+    GIT_TAG origin
+)
+
 #compile project itself
 include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_BINARY_DIR}/src/config_project-build/include)
+include_directories(${CMAKE_BINARY_DIR}/src/miller_project-build)
 
 link_directories(${CMAKE_BINARY_DIR}/src/config_project-build/lib)
+link_directories(${CMAKE_BINARY_DIR}/src/miller_project-build)
 
 file(GLOB CPP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 set(EXEC_NAME DislScatHexMCMisfitThreading)
 add_executable(${EXEC_NAME} ${CPP_SOURCES})
 
 add_dependencies(${EXEC_NAME} config_project)
+add_dependencies(${EXEC_NAME} miller_project)
 
-target_link_libraries(${EXEC_NAME} config++ gsl 
+target_link_libraries(${EXEC_NAME} config++ gsl miller
                                     ${Boost_LIBRARIES} 
                                     ${BLAS_LIBRARIES}
                                     ${MPI_LIBRARIES})
