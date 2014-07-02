@@ -60,7 +60,7 @@ static void master(std::string filename)
     while (!engine.done(cumData))
     {
         /* Send the slave a new work unit */
-        MPI_Bcast(&curData->m_nbSteps, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Bcast(&curData->m_nbSteps, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
 
         /*master also works*/
         calculator->run(curData);
